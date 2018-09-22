@@ -20,7 +20,6 @@ d3.json("data.json").then(function(data) {
 
   // Compute index per node.
   nodes.forEach(function(node, i) {
-    node.index = i;
     node.count = 0;
     matrix[i] = d3.range(n).map(function(j) { return {x: j, y: i, z: 0}; });
   });
@@ -37,13 +36,14 @@ d3.json("data.json").then(function(data) {
 
   // Precompute the orders.
   var orders = {
-    name: d3.range(n).sort(function(a, b) { return d3.ascending(nodes[a].name, nodes[b].name); }),
+    // index: d3.range(n).sort(function(a, b) { return d3.ascending(nodes[a].index, nodes[b].index); }),
+    index: d3.range(n).sort(d3.ascending),
     count: d3.range(n).sort(function(a, b) { return nodes[b].count - nodes[a].count; }),
     group: d3.range(n).sort(function(a, b) { return nodes[b].group - nodes[a].group; })
   };
 
   // The default sort order.
-  x.domain(orders.name);
+  x.domain(orders.index);
 
   svg.append("rect")
       .attr("class", "background")
@@ -65,7 +65,7 @@ d3.json("data.json").then(function(data) {
       .attr("y", x.bandwidth() / 2)
       .attr("dy", ".32em")
       .attr("text-anchor", "end")
-      .text(function(d, i) { return nodes[i].name; });
+      .text(function(d, i) { return nodes[i].index; });
 
   var column = svg.selectAll(".column")
       .data(matrix)
@@ -81,7 +81,7 @@ d3.json("data.json").then(function(data) {
       .attr("y", x.bandwidth() / 2)
       .attr("dy", ".32em")
       .attr("text-anchor", "start")
-      .text(function(d, i) { return nodes[i].name; });
+      .text(function(d, i) { return nodes[i].index; });
 
   function row(row) {
     var cell = d3.select(this).selectAll(".cell")
@@ -114,7 +114,7 @@ d3.json("data.json").then(function(data) {
   function order(value) {
     x.domain(orders[value]);
 
-    var t = svg.transition().duration(2500);
+    var t = svg.transition().duration(1000);
 
     t.selectAll(".row")
         .delay(function(d, i) { return x(i) * 4; })
@@ -131,5 +131,5 @@ d3.json("data.json").then(function(data) {
   var timeout = setTimeout(function() {
       order("group");
       d3.select("#order").property("selectedIndex", 2).node().focus();
-  }, 5000);
+  }, 1000);
 });
