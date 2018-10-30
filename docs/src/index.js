@@ -3,7 +3,7 @@ import * as d3 from 'd3'
 
 let width = 1000
 let height = 1000
-let margin = { top: 100, right: 0, bottom: 10, left: 0 }
+let margin = { top: 50, right: 10, bottom: 10, left: 30 }
 
 d3.json('data.json').then(visualizeNmf)
 
@@ -48,13 +48,13 @@ function visualizeNmf (data) {
 
   // text labeling
   // -----------------------
-  d3.select('body')
-    .append('pre')
-    .style('background', 'black')
-    .style('color', 'white')
-    .text(x.bandwidth())
-  let posXLabel = { x: 6, y: x.bandwidth() / 2 }  // rotated by 90 deg
-  let posYLabel = { x: -6, y: y.bandwidth() / 2 }
+  // d3.select('body')
+  //   .append('pre')
+  //   .style('background', 'black')
+  //   .style('color', 'white')
+  //   .text(x.bandwidth())
+  let posXLabel = { x: 6, y: x.bandwidth() / 2 } // rotated by 90 deg
+  let posYLabel = { x: -25, y: y.bandwidth() / 2 }
   let dyText = '.32em'
 
   let rowText = svg.selectAll('.row')
@@ -79,7 +79,7 @@ function visualizeNmf (data) {
     .attr('transform', function (d, i) { return 'translate(' + x(i) + ')rotate(-90)' })
 
   colText.append('line')
-    .attr('x1', -width)
+    .attr('x1', -height)
 
   colText.append('text')
     .attr('x', posXLabel['x'])
@@ -95,7 +95,8 @@ function visualizeNmf (data) {
     .attr('transform', function (d, i) {
       return 'translate(' + x(d.x) + ',' + y(d.y) + ')'
     })
-    .each(fillCells)
+
+  cells.each(fillCells)
 
   function fillCells (elem) {
     d3.select(this).selectAll('.cell')
@@ -137,7 +138,7 @@ function visualizeNmf (data) {
 
   function order (value) {
     orderColumn(value)
-    setTimeout(orderRow(value), 4000)
+    setTimeout(orderRow, 4000, value)
   }
 
   function orderRow (value) {
