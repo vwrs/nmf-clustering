@@ -1,7 +1,13 @@
 Visualization demo using d3.js
 ===
+## Run
+```
+$ npm i
+$ npm run serve
+```
+
 ## Local Setup
-- Create package.json
+- Create `package.json`
 ```
 $ npm init
 ```
@@ -20,9 +26,13 @@ $ npm i --save d3
 ```
 - Build with continuous watching
 ```
-$ npx webpack --watch
+$ npm run dev
+```
+- Build for production
+```
+$ npm run build
 ```
 - Run the HTTP server & Open your default browser
 ```
-$ npx http-server -o
+$ npm run serve
 ```
