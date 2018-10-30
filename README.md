@@ -5,3 +5,6 @@ NMF demo for clustering
 - Nonnegative matrix factorization can be used for clustering
 
 ![result](https://github.com/vwrs/nmf-clustering/blob/img/nmf-clustering.png)
+
+## Visualization Demo
+See `docs/README.md`.
