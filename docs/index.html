@@ -4,8 +4,7 @@
 <title>NMF visualization demo</title>
 
 <head>
-  <link rel="stylesheet" href="style.css" charset="utf-8">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.7.0/d3.js"></script>
+  <link rel="stylesheet" href="dist/main.css" charset="utf-8">
 </head>
 
 <header>
@@ -16,12 +15,11 @@
 <h1>NMF visualization demo</h1>
 
 <aside>
-<p>Order: <select id="order">
-  <option value="index">by index</option>
-  <option value="count">by Frequency</option>
-  <option value="group">by Cluster</option>
+<p>Order by:
+<select id="order">
+  <option id="index" value="index">index</option>
+  <option id="group" value="group">group</option>
 </select>
 </aside>
 
-<script src="script.js"></script>
-
+<script type=module src="dist/main.js"></script>

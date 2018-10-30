@@ -13,6 +13,11 @@ $ npm i --save-dev webpack webpack-cli @webpack-cli/init
 ```
 $ npx webpack init
 ```
+
+- Install d3.js
+```
+$ npm i --save d3
+```
 - Build with continuous watching
 ```
 $ npx webpack --watch
