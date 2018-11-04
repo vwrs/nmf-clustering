@@ -108,7 +108,7 @@ function visualizeNmf (data) {
       .attr('width', x.bandwidth())
       .attr('height', y.bandwidth())
       // TODO colorize for each group
-      // .attr('opacity', 0.9)
+      .attr('opacity', 0.7)
       // .style('fill-opacity', function (d) { return scaleOpacity(d.v) })
       // .attr('fill', function (d) { return colorGroup(data.rgroup[d.x]) })
       .attr('fill', function (d) { return colorScale(data.rgroup[d.x]) })
@@ -117,8 +117,8 @@ function visualizeNmf (data) {
   }
 
   function mouseover (p) {
-    d3.selectAll('.row text').classed('active', function (d, i) { return i == p.y })
-    d3.selectAll('.column text').classed('active', function (d, i) { return i == p.x })
+    d3.selectAll('.row text').classed('active', function (d, i) { return i === p.y })
+    d3.selectAll('.column text').classed('active', function (d, i) { return i === p.x })
   }
 
   function mouseout () {
@@ -128,13 +128,6 @@ function visualizeNmf (data) {
   d3.select('#order').on('change', function () {
     order(this.value)
   })
-
-  function rowPromise (value) {
-    return new Promise(function (resolve, reject) {
-      orderRow(value)
-      resolve(value)
-    })
-  }
 
   function order (value) {
     orderColumn(value)
