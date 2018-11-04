@@ -17,3 +17,17 @@ text.active {
   fill: red;
   font-size: 20px; }
 
+#container {
+  display: grid;
+  grid-template-rows: 20vw 80vw;
+  grid-template-columns: 20vw 80vw; }
+  #container #w {
+    grid-row: 2 / 3;
+    grid-column: 1 / 2; }
+  #container #h {
+    grid-row: 1 / 2;
+    grid-column: 2 / 3; }
+  #container #matrix {
+    grid-row: 2 / 3;
+    grid-column: 2 / 3; }
+
