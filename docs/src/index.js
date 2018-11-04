@@ -52,16 +52,16 @@ function visualizeNmf (data) {
   //   .append('pre')
   //   .style('background', 'black')
   //   .style('color', 'white')
-  //   .text(x.bandwidth())
+  //   .text(data.matrix[1].length)
   let posXLabel = { x: 6, y: x.bandwidth() / 2 } // rotated by 90 deg
   let posYLabel = { x: -25, y: y.bandwidth() / 2 }
   let dyText = '.32em'
 
   let rowText = svg.selectAll('.row')
-    .data(matrix)
+    .data(d3.range(N))
     .enter().append('g')
     .attr('class', 'row')
-    .attr('transform', function (d, i) { return 'translate(0,' + y(i) + ')' })
+    .attr('transform', function (d, i) { return 'translate(0,' + y(d) + ')' })
 
   rowText.append('line')
     .attr('x2', width)
@@ -73,10 +73,10 @@ function visualizeNmf (data) {
     .text(function (d, i) { return i })
 
   let colText = svg.selectAll('.column')
-    .data(matrix)
+    .data(d3.range(N))
     .enter().append('g')
     .attr('class', 'column')
-    .attr('transform', function (d, i) { return 'translate(' + x(i) + ')rotate(-90)' })
+    .attr('transform', function (d, i) { return 'translate(' + x(d) + ')rotate(-90)' })
 
   colText.append('line')
     .attr('x1', -height)
@@ -111,7 +111,8 @@ function visualizeNmf (data) {
       .attr('opacity', 0.7)
       // .style('fill-opacity', function (d) { return scaleOpacity(d.v) })
       // .attr('fill', function (d) { return colorGroup(data.rgroup[d.x]) })
-      .attr('fill', function (d) { return colorScale(data.rgroup[d.x]) })
+      // .attr('fill', function (d) { return colorScale(data.matrix[d.y][d.x]) })
+      .attr('fill', function (d) { return colorScale(d.v) })
       .on('mouseover', mouseover)
       .on('mouseout', mouseout)
   }
