@@ -1,4 +1,4 @@
-NMF demo for clustering
+NMF Visualization
 ===
 
 - generate samples from K isotropic multivariate gaussian distributions
