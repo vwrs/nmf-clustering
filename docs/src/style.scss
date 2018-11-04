@@ -22,3 +22,23 @@ text.active {
   font-size: 20px;
 }
 
+#container {
+  display: grid;
+  grid-template-rows: 20vw 80vw;
+  grid-template-columns: 20vw 80vw;
+
+  #w {
+    grid-row: 2 / 3;
+    grid-column: 1 / 2;
+  }
+
+  #h {
+    grid-row: 1 / 2;
+    grid-column: 2 / 3;
+  }
+
+  #matrix {
+    grid-row: 2 / 3;
+    grid-column: 2 / 3;
+  }
+}
