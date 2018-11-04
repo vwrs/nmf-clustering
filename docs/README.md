@@ -1,9 +1,13 @@
 Visualization demo using d3.js
 ===
+## Tools
+- d3.js
+- Webpack
+
 ## Run
 ```
 $ npm i
-$ npm run serve
+$ npx run serve
 ```
 
 ## Local Setup
@@ -13,7 +17,7 @@ $ npm init
 ```
 - Install webpack
 ```
-$ npm i --save-dev webpack webpack-cli @webpack-cli/init
+$ npm i --save-dev webpack webpack-cli @webpack-cli/init http-server
 ```
 - Create `webpack.[name].js`
 ```
