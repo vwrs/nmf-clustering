@@ -7,19 +7,22 @@
   <link rel="stylesheet" href="dist/main.css" charset="utf-8">
 </head>
 
-<header>
-  <aside>2018-09-22</aside>
-</header>
-
-<!-- content -->
-<h1>NMF visualization demo</h1>
+<h1>NMF Visualization Demo</h1>
 
 <aside>
 <p>Order by:
 <select id="order">
   <option id="index" value="index">index</option>
-  <option id="group" value="group">group</option>
+  <option id="sorted" value="sorted">sorted</option>
 </select>
+</p>
 </aside>
 
-<script type=module src="dist/main.js"></script>
+<!-- Grid Layout -->
+<div id="container">
+  <div id="w"></div>
+  <div id="h"></div>
+  <div id="matrix"></div>
+</div>
+
+<script src="dist/main.js"></script>

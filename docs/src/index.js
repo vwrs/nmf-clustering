@@ -13,500 +13,246 @@ let margin = { top: 50, right: 50, bottom: 10, left: 30 }
 d3.json('data.json').then(visualizeNmf)
 
 function visualizeNmf (data) {
-  drawMatrix(data)
-  drawW(data)
-  drawH(data)
-}
-
-function drawH (data) {
-  let elem = document.getElementById('h')
-  let width = window.innerWidth || document.documentElement.clientWidth || elem.clientWidth
-  let height = elem.clientHeight
-  width -= 2 * (margin.right + margin.left)
-  height -= margin.top
-  let N = data.H[0].length
-  let R = 10
-
-  let matrix = []
-  data.H.forEach(function (vector, i) {
-    matrix[i] = d3.range(N).map(function (j) {
-      return { x: j, y: i, v: vector[j] }
-    })
-  })
-
-  // create a SVG object
-  let svg = d3.select('#h')
-    .append('svg')
-    .attr('width', width + margin.left + margin.right)
-    .attr('height', height + margin.top + margin.bottom)
-    .style('margin-left', -margin.left + 'px')
-    .append('g')
-    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-
-  // row, column scaling
-  let colorScale = d3.scaleSequential(
-    function (t) { return d3.interpolate('white', 'purple')(t) }
-  ).domain([0, d3.max(data.W, function (row) { return d3.max(row) })])
-
-  let x = d3.scaleBand().range([0, width]).domain(d3.range(N))
-  let y = d3.scaleBand().range([0, height]).domain(d3.range(R))
-
-  svg.append('rect')
-    .attr('class', 'background')
-    .attr('width', width)
-    .attr('height', height)
-
-  // text labeling
-  // -----------------------
-  let posXLabel = { x: 6, y: x.bandwidth() / 2 } // rotated by 90 deg
-  let posYLabel = { x: -25, y: y.bandwidth() / 2 }
-  let dyText = '.32em'
-
-  let rowText = svg.selectAll('.hrow')
-    .data(d3.range(R))
-    .enter().append('g')
-    .attr('class', 'hrow')
-    .attr('transform', function (d, i) { return 'translate(0,' + y(d) + ')' })
-
-  rowText.append('line')
-    .attr('x2', width)
-
-  rowText.append('text')
-    .attr('x', posYLabel['x'])
-    .attr('y', posYLabel['y'])
-    .attr('dy', dyText)
-    .text(function (d, i) { return i })
-
-  let colText = svg.selectAll('.hcolumn')
-    .data(d3.range(N))
-    .enter().append('g')
-    .attr('class', 'hcolumn')
-    .attr('transform', function (d, i) { return 'translate(' + x(d) + ')rotate(-90)' })
-
-  colText.append('line')
-    .attr('x1', -height)
-
-  colText.append('text')
-    .attr('x', posXLabel['x'])
-    .attr('y', posXLabel['y'])
-    .attr('dy', dyText)
-    .text(function (d, i) { return i })
-
-  // create cells
-  let cells = svg.selectAll('.hcell')
-    .data(matrix)
-    .enter().append('g')
-    .attr('class', 'hcell')
-    .attr('transform', function (d, i) {
-      return 'translate(' + x(d.x) + ',' + y(d.y) + ')'
-    })
-
-  cells.each(fillCells)
-
-  function fillCells (elem) {
-    d3.select(this).selectAll('.hcell')
-      .data(elem.filter(function (d) { return d.v }))
-      .enter().append('rect')
-      .attr('class', 'hcell')
-      .attr('x', function (d) { return x(d.x) })
-      .attr('y', function (d) { return y(d.y) })
-      .attr('width', x.bandwidth())
-      .attr('height', y.bandwidth())
-      .attr('opacity', 0.7)
-      .attr('fill', function (d) { return colorScale(d.v) })
-      .on('mouseover', mouseover)
-      .on('mouseout', mouseout)
-  }
-
-  function mouseover (p) {
-    d3.selectAll('.hrow text').classed('active', function (d, i) { return i === p.y })
-    d3.selectAll('.hcolumn text').classed('active', function (d, i) { return i === p.x })
-  }
-
-  function mouseout () {
-    d3.selectAll('text').classed('active', false)
-  }
-
-  d3.select('#horder').on('change', function () {
-    order(this.value)
-  })
-
-  function order (value) {
-    orderColumn(value)
-  }
-
-  function orderColumn (value) {
-    if (value === 'group') {
-      x.domain(data.column_order)
-    } else { // sort by index
-      x.domain(d3.range(N))
-    }
-
-    let t = svg.transition().duration(2000)
-
-    t.selectAll('.hcolumn')
-      .delay(function (d, i) { return x(i) * 0.5 })
-      .attr('transform', function (d, i) { return 'translate(' + x(i) + ')rotate(-90)' })
-
-    t.selectAll('.hcell')
-      .delay(function (d) { return x(d.x) * 0.5 })
-      .attr('x', function (d) { return x(d.x) })
-  }
-}
-
-function drawW (data) {
-  let elem = document.getElementById('w')
-  let width = elem.clientWidth
-  let height = window.innerHeight || document.documentElement.clientHeight || elem.clientHeight
-  width -= margin.right
-  height -= 2 * (margin.top + margin.bottom)
-  let N = data.W.length
-  let R = 10
-
-  let matrix = []
-  data.W.forEach(function (vector, i) {
-    matrix[i] = d3.range(N).map(function (j) {
-      return { x: j, y: i, v: vector[j] }
-    })
-  })
-
-  // create a SVG object
-  let svg = d3.select('#w')
-    .append('svg')
-    .attr('width', width + margin.left + margin.right)
-    .attr('height', height + margin.top + margin.bottom)
-    .style('margin-left', -margin.left + 'px')
-    .append('g')
-    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-
-  // row, column scaling
-  let colorScale = d3.scaleSequential(
-    function (t) { return d3.interpolate('white', 'green')(t) }
-  ).domain([0, d3.max(data.W, function (row) { return d3.max(row) })])
-
-  let x = d3.scaleBand().range([0, width]).domain(d3.range(R))
-  let y = d3.scaleBand().range([0, height]).domain(d3.range(N))
-
-  // let colorGroup = d3.scaleOrdinal(d3.schemeCategory10).domain(d3.range(10))
-  // let matVal = data.W[0].map(function (e) { return e[1] })
-  // let maxVal = Math.max.apply(null, matVal)
-  // let minVal = Math.min.apply(null, matVal)
-  // let scaleOpacity = d3.scaleLinear().domain([minVal, maxVal]).clamp(true)
-  // let scaleOpacity = d3.scaleLinear().domain([0, 1]).clamp(true)
-
-  svg.append('rect')
-    .attr('class', 'background')
-    .attr('width', width)
-    .attr('height', height)
-
-  // text labeling
-  // -----------------------
-  let posXLabel = { x: 6, y: x.bandwidth() / 2 } // rotated by 90 deg
-  let posYLabel = { x: -25, y: y.bandwidth() / 2 }
-  let dyText = '.32em'
-
-  let rowText = svg.selectAll('.wrow')
-    .data(d3.range(N))
-    .enter().append('g')
-    .attr('class', 'wrow')
-    .attr('transform', function (d, i) { return 'translate(0,' + y(d) + ')' })
-
-  rowText.append('line')
-    .attr('x2', width)
-
-  rowText.append('text')
-    .attr('x', posYLabel['x'])
-    .attr('y', posYLabel['y'])
-    .attr('dy', dyText)
-    .text(function (d, i) { return i })
-
-  let colText = svg.selectAll('.wcolumn')
-    .data(d3.range(R))
-    .enter().append('g')
-    .attr('class', 'wcolumn')
-    .attr('transform', function (d, i) { return 'translate(' + x(d) + ')rotate(-90)' })
-
-  colText.append('line')
-    .attr('x1', -height)
-
-  colText.append('text')
-    .attr('x', posXLabel['x'])
-    .attr('y', posXLabel['y'])
-    .attr('dy', dyText)
-    .text(function (d, i) { return i })
-
-  // create cells
-  let cells = svg.selectAll('.wcell')
-    .data(matrix)
-    .enter().append('g')
-    .attr('class', 'wcell')
-    .attr('transform', function (d, i) {
-      return 'translate(' + x(d.x) + ',' + y(d.y) + ')'
-    })
-
-  cells.each(fillCells)
-
-  function fillCells (elem) {
-    d3.select(this).selectAll('.wcell')
-      .data(elem.filter(function (d) { return d.v }))
-      .enter().append('rect')
-      .attr('class', 'wcell')
-      .attr('x', function (d) { return x(d.x) })
-      .attr('y', function (d) { return y(d.y) })
-      .attr('width', x.bandwidth())
-      .attr('height', y.bandwidth())
-      // TODO colorize for each group
-      .attr('opacity', 0.7)
-      // .style('fill-opacity', function (d) { return scaleOpacity(d.v) })
-      // .attr('fill', function (d) { return colorGroup(data.rgroup[d.x]) })
-      // .attr('fill', function (d) { return colorScale(data.matrix[d.y][d.x]) })
-      .attr('fill', function (d) { return colorScale(d.v) })
-      .on('mouseover', mouseover)
-      .on('mouseout', mouseout)
-  }
-
-  function mouseover (p) {
-    d3.selectAll('.wrow text').classed('active', function (d, i) { return i === p.y })
-    d3.selectAll('.wcolumn text').classed('active', function (d, i) { return i === p.x })
-  }
-
-  function mouseout () {
-    d3.selectAll('text').classed('active', false)
-  }
-
-  d3.select('#worder').on('change', function () {
-    order(this.value)
-  })
-
-  function order (value) {
-    orderRow(value)
-  }
-
-  function orderRow (value) {
-    if (value === 'group') {
-      y.domain(data.row_order)
-    } else { // sort by index
-      y.domain(d3.range(N))
-    }
-
-    let t = svg.transition().duration(2000)
-
-    t.selectAll('.wrow')
-      .delay(function (d, i) { return y(i) * 0.5 })
-      .attr('transform', function (d, i) { return 'translate(0,' + y(i) + ')' })
-
-    t.selectAll('.wcell')
-      .delay(function (d) { return y(d.y) * 0.5 })
-      .attr('y', function (d) { return y(d.y) })
-  }
-}
-
-function drawMatrix(data) {
-  let elem = document.getElementById('matrix')
-  let width = window.innerWidth || document.documentElement.clientWidth || elem.clientWidth
-  let height = window.innerHeight || document.documentElement.clientHeight || elem.clientHeight
-  width -= 2 * (margin.right + margin.left)
-  height -= 2 * (margin.top + margin.bottom)
-
-  let N = data.matrix.length
-  let matrix = []
-  data.matrix.forEach(function (vector, i) {
-    matrix[i] = d3.range(N).map(function (j) {
-      return { x: j, y: i, v: vector[j] }
-    })
-  })
-
-  // create a SVG object
-  let svg = d3.select('#matrix')
-    .append('svg')
-    .attr('width', width + margin.left + margin.right)
-    .attr('height', height + margin.top + margin.bottom)
-    .style('margin-left', -margin.left + 'px')
-    .append('g')
-    .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
-
-  // row, column scaling
-  let colorScale = d3.scaleSequential(
-    function (t) { return d3.interpolate('white', 'steelblue')(t) }
-  ).domain([0, d3.max(data.matrix, function (row) { return d3.max(row) })])
-
-  let x = d3.scaleBand().range([0, width]).domain(d3.range(N))
-  let y = d3.scaleBand().range([0, height]).domain(d3.range(N))
-
-  // let colorGroup = d3.scaleOrdinal(d3.schemeCategory10).domain(d3.range(10))
-  // let matVal = data.matrix[0].map(function (e) { return e[1] })
-  // let maxVal = Math.max.apply(null, matVal)
-  // let minVal = Math.min.apply(null, matVal)
-  // let scaleOpacity = d3.scaleLinear().domain([minVal, maxVal]).clamp(true)
-  // let scaleOpacity = d3.scaleLinear().domain([0, 1]).clamp(true)
-
-  svg.append('rect')
-    .attr('class', 'background')
-    .attr('width', width)
-    .attr('height', height)
-
-  // text labeling
-  // -----------------------
-  let posXLabel = { x: 6, y: x.bandwidth() / 2 } // rotated by 90 deg
-  let posYLabel = { x: -25, y: y.bandwidth() / 2 }
-  let dyText = '.32em'
-
-  let rowText = svg.selectAll('.row')
-    .data(d3.range(N))
-    .enter().append('g')
-    .attr('class', 'row')
-    .attr('transform', function (d, i) { return 'translate(0,' + y(d) + ')' })
-
-  rowText.append('line')
-    .attr('x2', width)
-
-  rowText.append('text')
-    .attr('x', posYLabel['x'])
-    .attr('y', posYLabel['y'])
-    .attr('dy', dyText)
-    .text(function (d, i) { return i })
-
-  let colText = svg.selectAll('.column')
-    .data(d3.range(N))
-    .enter().append('g')
-    .attr('class', 'column')
-    .attr('transform', function (d, i) { return 'translate(' + x(d) + ')rotate(-90)' })
-
-  colText.append('line')
-    .attr('x1', -height)
-
-  colText.append('text')
-    .attr('x', posXLabel['x'])
-    .attr('y', posXLabel['y'])
-    .attr('dy', dyText)
-    .text(function (d, i) { return i })
-
-  // create cells
-  let cells = svg.selectAll('.cell')
-    .data(matrix)
-    .enter().append('g')
-    .attr('class', 'cell')
-    .attr('transform', function (d, i) {
-      return 'translate(' + x(d.x) + ',' + y(d.y) + ')'
-    })
-
-  cells.each(fillCells)
-
-  function fillCells (elem) {
-    d3.select(this).selectAll('.cell')
-      .data(elem.filter(function (d) { return d.v }))
-      .enter().append('rect')
-      .attr('class', 'cell')
-      .attr('x', function (d) { return x(d.x) })
-      .attr('y', function (d) { return y(d.y) })
-      .attr('width', x.bandwidth())
-      .attr('height', y.bandwidth())
-      // TODO colorize for each group
-      .attr('opacity', 0.7)
-      // .style('fill-opacity', function (d) { return scaleOpacity(d.v) })
-      // .attr('fill', function (d) { return colorGroup(data.rgroup[d.x]) })
-      // .attr('fill', function (d) { return colorScale(data.matrix[d.y][d.x]) })
-      .attr('fill', function (d) { return colorScale(d.v) })
-      .on('mouseover', mouseover)
-      .on('mouseout', mouseout)
-  }
-
-  function mouseover (p) {
-    d3.selectAll('.row text').classed('active', function (d, i) { return i === p.y })
-    d3.selectAll('.column text').classed('active', function (d, i) { return i === p.x })
-  }
-
-  function mouseout () {
-    d3.selectAll('text').classed('active', false)
-  }
+  let insMatrix = new Drawer('matrix', data, 'steelblue')
+  let insW = new Drawer('w', data, 'green')
+  let insH = new Drawer('h', data, 'purple')
+  insMatrix.draw()
+  insW.draw()
+  insH.draw()
 
   d3.select('#order').on('change', function () {
-    order(this.value)
-  })
+    let val = this.value
+    insW.orderRow(val)
+    insMatrix.orderRow(val)
 
-  function order (value) {
-    orderColumn(value)
-    setTimeout(orderRow, 4000, value)
+    setTimeout(function () {
+      insMatrix.orderColumn(val)
+      insH.orderColumn(val)
+    }, 4000)
+  })
+}
+
+let Drawer = class Drawer {
+  constructor (name, data, color = 'steelblue') {
+    this.data = data
+    this.name = name
+    this.color = color
+
+    let elem = document.getElementById(this.name)
+    this.width = window.innerWidth || document.documentElement.clientWidth || elem.clientWidth
+    this.height = window.innerHeight || document.documentElement.clientHeight || elem.clientHeight
+    this.width -= 2 * (margin.right + margin.left)
+    this.height -= 2 * (margin.top + margin.bottom)
+    switch (this.name) {
+      case 'matrix':
+        this.matrix = this.data.matrix
+        this.N = this.matrix.length
+        this.D = this.matrix[0].length
+        this.rowsize = this.N
+        this.colsize = this.D
+        break
+
+      case 'w':
+        this.width = elem.clientWidth - margin.right
+        this.matrix = this.data.W
+        this.N = this.matrix.length
+        this.D = this.matrix[0].length
+        this.rowsize = this.N
+        this.colsize = this.D
+        break
+
+      case 'h':
+        this.height = elem.clientHeight - margin.top
+        this.matrix = this.data.H
+        this.N = this.matrix[0].length
+        this.D = this.matrix.length
+        this.rowsize = this.D
+        this.colsize = this.N
+        break
+    }
   }
 
-  function orderRow (value) {
-    if (value === 'group') {
-      y.domain(data.row_order)
+  draw () {
+    let matrix = []
+    let N = this.N
+    let color = this.color
+
+    this.matrix.forEach(function (vector, i) {
+      matrix[i] = d3.range(N).map(function (j) {
+        return { x: j, y: i, v: vector[j] }
+      })
+    })
+
+    // create a SVG object
+    this.svg = d3.select('#' + this.name)
+      .append('svg')
+      .attr('width', this.width + margin.left + margin.right)
+      .attr('height', this.height + margin.top + margin.bottom)
+      .style('margin-left', -margin.left + 'px')
+      .append('g')
+      .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')')
+
+    // row, column scaling
+    let colorScale = d3.scaleSequential(
+      function (t) { return d3.interpolate('white', color)(t) }
+    ).domain([0, d3.max(this.matrix, function (row) { return d3.max(row) })])
+
+    this.x = d3.scaleBand().range([0, this.width]).domain(d3.range(this.colsize))
+    this.y = d3.scaleBand().range([0, this.height]).domain(d3.range(this.rowsize))
+
+    // let colorGroup = d3.scaleOrdinal(d3.schemeCategory10).domain(d3.range(10))
+    // let matVal = this.matrix[0].map(function (e) { return e[1] })
+    // let maxVal = Math.max.apply(null, matVal)
+    // let minVal = Math.min.apply(null, matVal)
+    // let scaleOpacity = d3.scaleLinear().domain([minVal, maxVal]).clamp(true)
+    // let scaleOpacity = d3.scaleLinear().domain([0, 1]).clamp(true)
+
+    this.svg.append('rect')
+      .attr('class', 'background')
+      .attr('width', this.width)
+      .attr('height', this.height)
+
+    // text labeling
+    // -----------------------
+    let rowClass = 'row' + this.name
+    let colClass = 'col' + this.name
+    let cellClass = 'cell' + this.name
+    let opacity = 0.7
+    let posXLabel = { x: 6, y: this.x.bandwidth() / 2 } // rotated by 90 deg
+    let posYLabel = { x: -25, y: this.y.bandwidth() / 2 }
+    let dyText = '.32em'
+    let x = this.x
+    let y = this.y
+
+    let rowText = this.svg.selectAll('.' + rowClass)
+      .data(d3.range(this.rowsize))
+      .enter().append('g')
+      .attr('class', rowClass)
+      .attr('transform', function (d, i) { return 'translate(0,' + y(d) + ')' })
+
+    rowText.append('line')
+      .attr('x2', this.width)
+
+    rowText.append('text')
+      .attr('x', posYLabel['x'])
+      .attr('y', posYLabel['y'])
+      .attr('dy', dyText)
+      .text(function (d, i) { return i })
+
+    let colText = this.svg.selectAll('.' + colClass)
+      .data(d3.range(this.colsize))
+      .enter().append('g')
+      .attr('class', colClass)
+      .attr('transform', function (d, i) { return 'translate(' + x(d) + ')rotate(-90)' })
+
+    colText.append('line')
+      .attr('x1', -this.height)
+
+    colText.append('text')
+      .attr('x', posXLabel['x'])
+      .attr('y', posXLabel['y'])
+      .attr('dy', dyText)
+      .text(function (d, i) { return i })
+
+    // create cells
+    let cells = this.svg.selectAll('.' + cellClass)
+      .data(matrix)
+      .enter().append('g')
+      .attr('class', cellClass)
+      // .attr('transform', function (d, i) {
+      //   return 'translate(' + x(d.x) + ',' + y(d.y) + ')'
+      // })
+
+    let mouseover = this.mouseover
+    let mouseout = this.mouseout
+    cells.each(function (elem) {
+      d3.select(this).selectAll('.' + cellClass)
+        .data(elem.filter(function (d) { return d.v }))
+        .enter().append('rect')
+        .attr('class', cellClass)
+        .attr('x', function (d) { return x(d.x) })
+        .attr('y', function (d) { return y(d.y) })
+        .attr('width', x.bandwidth())
+        .attr('height', y.bandwidth())
+        .attr('opacity', opacity)
+        // colorize for each group
+        // .style('fill-opacity', function (d) { return scaleOpacity(d.v) })
+        // .attr('fill', function (d) { return colorGroup(this.data.rgroup[d.x]) })
+        .attr('fill', function (d) { return colorScale(d.v) })
+        .on('mouseover', mouseover)
+        .on('mouseout', mouseout)
+    })
+
+    // draw a matrix as a heatmap
+    // g.selectAll('.row')
+    //   .data(matrix)
+    //   .enter()
+    //   .append('g')
+    //   .attr('class', 'row')
+    //   .attr('transform', function (d, i) { return 'translate(0,' + scale(i) + ')' })
+    //   .selectAll('.cell')
+    //   .data(function (d) { return d })
+    //   .enter()
+    //   .append('rect')
+    //   .attr('class', 'cell')
+    //   .attr('x', function (d, i) { return scale(i) })
+    //   .attr('width', scale.bandwidth())
+    //   .attr('height', scale.bandwidth())
+    //   .attr('opacity', 0.9)
+    //   .attr('fill', function (d) { return color(d) })
+  }
+
+  mouseover (p) {
+    d3.selectAll('.row' + this.name + ' text')
+      .classed('active', function (d, i) { return i === p.y })
+    d3.selectAll('.col' + this.name + ' text')
+      .classed('active', function (d, i) { return i === p.x })
+  }
+
+  mouseout () {
+    d3.selectAll('text').classed('active', false)
+  }
+
+  order (value) {
+    this.orderColumn(value)
+    setTimeout(this.orderRow, 4000, value)
+  }
+
+  orderRow (value) {
+    let y = this.y
+    if (value === 'sorted') {
+      y.domain(this.data.row_order)
     } else { // sort by index
-      y.domain(d3.range(N))
+      y.domain(d3.range(this.rowsize))
     }
 
-    let t = svg.transition().duration(2000)
+    let t = this.svg.transition().duration(2000)
 
-    t.selectAll('.row')
+    t.selectAll('.row' + this.name)
       .delay(function (d, i) { return y(i) * 0.5 })
       .attr('transform', function (d, i) { return 'translate(0,' + y(i) + ')' })
 
-    t.selectAll('.cell')
+    t.selectAll('.cell' + this.name)
       .delay(function (d) { return y(d.y) * 0.5 })
       .attr('y', function (d) { return y(d.y) })
   }
 
-  function orderColumn (value) {
-    if (value === 'group') {
-      x.domain(data.column_order)
+  orderColumn (value) {
+    let x = this.x
+    if (value === 'sorted') {
+      x.domain(this.data.column_order)
     } else { // sort by index
-      x.domain(d3.range(N))
+      x.domain(d3.range(this.colsize))
     }
 
-    let t = svg.transition().duration(2000)
+    let t = this.svg.transition().duration(2000)
 
-    t.selectAll('.column')
+    t.selectAll('.col' + this.name)
       .delay(function (d, i) { return x(i) * 0.5 })
       .attr('transform', function (d, i) { return 'translate(' + x(i) + ')rotate(-90)' })
 
-    t.selectAll('.cell')
+    t.selectAll('.cell' + this.name)
       .delay(function (d) { return x(d.x) * 0.5 })
       .attr('x', function (d) { return x(d.x) })
   }
-
-  // color scaling
-  // let scale = d3.scaleBand()
-  //   .rangeRound([0, d3.min([width, height])])
-  //   .domain(d3.range(N))
-  // draw matrix as heatmap
-  // g.selectAll('.row')
-  //   .data(matrix)
-  //   .enter()
-  //   .append('g')
-  //   .attr('class', 'row')
-  //   .attr('transform', function (d, i) { return 'translate(0,' + scale(i) + ')' })
-  //   .selectAll('.cell')
-  //   .data(function (d) { return d })
-  //   .enter()
-  //   .append('rect')
-  //   .attr('class', 'cell')
-  //   .attr('x', function (d, i) { return scale(i) })
-  //   .attr('width', scale.bandwidth())
-  //   .attr('height', scale.bandwidth())
-  //   .attr('opacity', 0.9)
-  //   .attr('fill', function (d) { return color(d) })
-
-  // function order (value) {
-  //   if (value === 'group') {
-  //     x.domain(data.row_order)
-  //     y.domain(data.column_order)
-  //   } else { // sort by index
-  //     x.domain(d3.range(N))
-  //     y.domain(d3.range(N))
-  //   }
-  //
-  //   let t = svg.transition().duration(2000)
-  //
-  //   t.selectAll('.row')
-  //     .delay(function (d, i) { return x(i) * 1 })
-  //     .attr('transform', function (d, i) { return 'translate(0,' + x(i) + ')' })
-  //     .selectAll('.cell')
-  //     .delay(function (d) { return x(d.x) * 1 })
-  //     .attr('x', function (d) { return x(d.x) })
-  //
-  //   t.selectAll('.column')
-  //     .delay(function (d, i) { return y(i) * 1 })
-  //     .attr('transform', function (d, i) { return 'translate(' + y(i) + ')rotate(-90)' })
-  // }
 }
