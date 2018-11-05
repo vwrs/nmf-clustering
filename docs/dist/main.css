@@ -1,33 +1,30 @@
-.background {
-  fill: #fefefe; }
-
-line {
-  stroke: #ddd;
-  opacity: 0.8; }
-
-svg {
-  padding-left: 80px;
-  font: 10px sans-serif; }
-
-text {
-  display: block;
-  white-space: nowrap; }
-
-text.active {
-  fill: red;
-  font-size: 20px; }
-
-#container {
-  display: grid;
-  grid-template-rows: 20vw 80vw;
-  grid-template-columns: 20vw 80vw; }
-  #container #w {
-    grid-row: 2 / 3;
-    grid-column: 1 / 2; }
-  #container #h {
-    grid-row: 1 / 2;
-    grid-column: 2 / 3; }
-  #container #matrix {
-    grid-row: 2 / 3;
-    grid-column: 2 / 3; }
+body {
+  font-family: sans-serif; }
+  body .background {
+    fill: #fefefe; }
+  body line {
+    stroke: #ddd;
+    opacity: 0.8; }
+  body svg {
+    padding-left: 80px;
+    font: 10px sans-serif; }
+  body text {
+    display: block;
+    white-space: nowrap; }
+  body text.active {
+    fill: red;
+    font-size: 20px; }
+  body #container {
+    display: grid;
+    grid-template-rows: 15vw 70vw;
+    grid-template-columns: 15vw 70vw; }
+    body #container #w {
+      grid-row: 2 / 3;
+      grid-column: 1 / 2; }
+    body #container #h {
+      grid-row: 1 / 2;
+      grid-column: 2 / 3; }
+    body #container #matrix {
+      grid-row: 2 / 3;
+      grid-column: 2 / 3; }
 

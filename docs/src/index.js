@@ -45,6 +45,7 @@ let Drawer = class Drawer {
     this.height -= 2 * (margin.top + margin.bottom)
     switch (this.name) {
       case 'matrix':
+        this.width -= 200
         this.matrix = this.data.matrix
         this.N = this.matrix.length
         this.D = this.matrix[0].length
@@ -62,6 +63,7 @@ let Drawer = class Drawer {
         break
 
       case 'h':
+        this.width -= 200
         this.height = elem.clientHeight - margin.top
         this.matrix = this.data.H
         this.N = this.matrix[0].length
@@ -100,12 +102,8 @@ let Drawer = class Drawer {
     this.x = d3.scaleBand().range([0, this.width]).domain(d3.range(this.colsize))
     this.y = d3.scaleBand().range([0, this.height]).domain(d3.range(this.rowsize))
 
+    // colorize for each group
     // let colorGroup = d3.scaleOrdinal(d3.schemeCategory10).domain(d3.range(10))
-    // let matVal = this.matrix[0].map(function (e) { return e[1] })
-    // let maxVal = Math.max.apply(null, matVal)
-    // let minVal = Math.min.apply(null, matVal)
-    // let scaleOpacity = d3.scaleLinear().domain([minVal, maxVal]).clamp(true)
-    // let scaleOpacity = d3.scaleLinear().domain([0, 1]).clamp(true)
 
     this.svg.append('rect')
       .attr('class', 'background')
@@ -159,9 +157,6 @@ let Drawer = class Drawer {
       .data(matrix)
       .enter().append('g')
       .attr('class', cellClass)
-      // .attr('transform', function (d, i) {
-      //   return 'translate(' + x(d.x) + ',' + y(d.y) + ')'
-      // })
 
     let mouseover = this.mouseover
     let mouseout = this.mouseout
@@ -176,30 +171,11 @@ let Drawer = class Drawer {
         .attr('height', y.bandwidth())
         .attr('opacity', opacity)
         // colorize for each group
-        // .style('fill-opacity', function (d) { return scaleOpacity(d.v) })
         // .attr('fill', function (d) { return colorGroup(this.data.rgroup[d.x]) })
         .attr('fill', function (d) { return colorScale(d.v) })
         .on('mouseover', mouseover)
         .on('mouseout', mouseout)
     })
-
-    // draw a matrix as a heatmap
-    // g.selectAll('.row')
-    //   .data(matrix)
-    //   .enter()
-    //   .append('g')
-    //   .attr('class', 'row')
-    //   .attr('transform', function (d, i) { return 'translate(0,' + scale(i) + ')' })
-    //   .selectAll('.cell')
-    //   .data(function (d) { return d })
-    //   .enter()
-    //   .append('rect')
-    //   .attr('class', 'cell')
-    //   .attr('x', function (d, i) { return scale(i) })
-    //   .attr('width', scale.bandwidth())
-    //   .attr('height', scale.bandwidth())
-    //   .attr('opacity', 0.9)
-    //   .attr('fill', function (d) { return color(d) })
   }
 
   mouseover (p) {
@@ -210,7 +186,8 @@ let Drawer = class Drawer {
   }
 
   mouseout () {
-    d3.selectAll('text').classed('active', false)
+    d3.selectAll('.row' + this.name +' text').classed('active', false)
+    d3.selectAll('.col' + this.name +' text').classed('active', false)
   }
 
   order (value) {
