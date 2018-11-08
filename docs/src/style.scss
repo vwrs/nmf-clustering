@@ -11,21 +11,21 @@ body {
   }
 
   svg {
-    padding-left: 80px;
     font: 10px sans-serif;
   }
 
   text {
     display: block;
     white-space: nowrap;
-  }
 
-  text.active {
-    fill: red;
-    font-size: 20px;
+    &.active {
+      fill: red;
+      font-size: 20px;
+    }
   }
 
   #container {
+    padding: 5vw;
     display: grid;
     grid-template-rows: 15vw 70vw;
     grid-template-columns: 15vw 70vw;

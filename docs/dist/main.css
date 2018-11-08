@@ -6,15 +6,15 @@ body {
     stroke: #ddd;
     opacity: 0.8; }
   body svg {
-    padding-left: 80px;
     font: 10px sans-serif; }
   body text {
     display: block;
     white-space: nowrap; }
-  body text.active {
-    fill: red;
-    font-size: 20px; }
+    body text.active {
+      fill: red;
+      font-size: 20px; }
   body #container {
+    padding: 5vw;
     display: grid;
     grid-template-rows: 15vw 70vw;
     grid-template-columns: 15vw 70vw; }
