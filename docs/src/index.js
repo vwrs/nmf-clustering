@@ -70,10 +70,16 @@ let Drawer = class Drawer {
     ).domain([0, maxVal])
 
     // colorize for each group
+    let groups = this.data.groups
     let colorGroups = []
-    d3.schemeCategory10.forEach((color, i) => {
+    let scaleFunc01 = d3.scaleSequential(d3.interpolate(0, 1))
+      .domain([0, groups])
+    let colors = d3.range(groups)
+      .map((v) => d3.interpolateRainbow(scaleFunc01(v)))
+
+    colors.forEach((color, i) => {
       colorGroups[i] = d3.scaleSequential(
-        (t) => d3.interpolate('#fff', color)(t)
+        (t) => d3.interpolate('rgb(255,255,255)', color)(t)
       ).domain([0, maxVal])
     })
 
